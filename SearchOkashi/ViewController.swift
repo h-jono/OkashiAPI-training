@@ -42,12 +42,28 @@ final class ViewController: UIViewController {
         let task = session.dataTask(with: req, completionHandler: {
             (data, response, error) in
             
+            if let error = error {
+                print("クライアントエラー: \(error.localizedDescription) \n")
+                return
+            }
+            
+            guard let data = data, let response = response as? HTTPURLResponse else {
+                print("no data or no response")
+                return
+            }
+            
+            if response.statusCode == 200 {
+                print(data)
+            } else {
+                print("サーバーエラー status code: \(response.statusCode) \n")
+            }
+            
             session.finishTasksAndInvalidate()
             
             do {
                 let decoder = JSONDecoder()
                 
-                let json = try decoder.decode(ResultJson.self, from: data!)
+                let json = try decoder.decode(ResultJson.self, from: data)
                 
                 if let items = json.item {
                     self.okashiList.removeAll()
